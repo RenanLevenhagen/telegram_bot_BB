@@ -1,0 +1,18 @@
+import telepot
+from pprint import pprint
+from telepot.loop import MessageLoop
+
+bot = telepot.Bot('cole aqui a sua chave')
+
+def handle_msg(msg):
+    ### Usamos essa função para tratar a mensagem enviada pelo usuário.
+    #pprint(msg) - descomente para verificar a estrutra da mensagem.
+    user_name = msg['chat']['first_name']
+    user_id = msg['chat']['id']
+    print(msg['text'])
+    if str.lower(msg['text'])=='/start':
+        bot.sendMessage(user_id,'Olá {}. Sou o bot BB_IA, estou aqui para explicar um pouco sobre esse mundo formidável da IA, mas não se preocupe, os robos só fazem o que são programados a fazer!'.format(user_name))
+    else:
+        bot.sendMessage(user_id,'Me desculpe {}. Estou apenas começando a aprender! Meus programadores estão apenas começando,mas jajá tem novidades aqui no bot.'.format(user_name))
+
+MessageLoop(bot, handle_msg).run_as_thread()
