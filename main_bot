@@ -1,0 +1,61 @@
+import telepot
+from pprint import pprint
+from telepot.loop import MessageLoop
+from ibm_watson import AssistantV2
+
+#Precisamos conectar ao assistenteV2 do ibm_watson.
+#todos os dados estão disponíveis na documentação da API V2.
+assistant = AssistantV2(
+    version='xxxx-xx-xx',
+    iam_apikey='chave aqui',
+    url='url aqui'
+)
+#Id do assistente estanciado acima, key disponível na plataforma da IBM.
+assist_id = 'chave aqui'
+
+#Conecxão com o Telegram, usando a biblioteca telepot.
+#Key fornecida pelo BotFather, assistente de criação de bot do Telegram.
+bot = telepot.Bot('chave aqui')
+
+#Função para abrir a sessão do assistente.
+def open_session(a_id):
+    response = assistant.create_session(
+    assistant_id=a_id
+    ).get_result()
+    return response['session_id']
+
+#Função responsável por enviar texto du usuário para ibm_watson, bem como
+#retornar texto processado.
+def bot_response(text,s_id,a_id):
+    response = assistant.message(
+        assistant_id=a_id,
+        session_id=s_id,
+        input={
+        'message_type': 'text',
+        'text': text}
+    ).get_result()
+    pprint(response)
+    return response['output']['generic'][-1]['text']
+
+
+#Função responsável pela troca de mensagem entre Usuário e Bot.
+def handle_msg(msg):
+    ### Usamos essa função para tratar a mensagem enviada pelo usuário.
+    user_name = msg['chat']['first_name']
+    user_id = msg['chat']['id']
+    print(msg['text'])
+    #If para enviar mensagem inicial do chat
+    if str.lower(msg['text'])=='/start':
+        bot.sendMessage(user_id,'Olá {}. Sou o bot BB_IA, estou aqui para explicar um pouco sobre esse mundo formidável da IA, mas não se preocupe, os robos só fazem o que são programados a fazer!'.format(user_name))
+    else:
+        bot.sendMessage(user_id,bot_response(msg['text'],sess_id,assist_id))
+
+#Abertura de sessão do AssistantV2
+sess_id = open_session(assist_id)
+
+#Listener do Telegram, é acionado quando usuário envia nova mensagem via chat.
+MessageLoop(bot, handle_msg).run_as_thread()
+
+#Comando de loop infinito para que sistema não pare de rodar.
+while True:
+    pass
